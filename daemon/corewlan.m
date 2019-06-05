@@ -18,6 +18,7 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <SystemConfiguration/SystemConfiguration.h>
 #import <CoreWLAN/CWInterface.h>
 #import <CoreWLAN/CWChannel.h>
 #import <CoreWLAN/CWWiFiClient.h>
