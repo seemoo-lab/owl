@@ -17,7 +17,17 @@ OWL is not affiliated with or endorsed by Apple Inc. Use this code at your own r
 To use OWL, you will need a Wi-Fi card supporting active monitor mode with frame injection. We recommend the Atheros AR9280 chip (IEEE 802.11n) which we used to develop and test this code. (Configurations that do not support active monitor mode, i.e., ACK received frames, might suffer from throughput degradation because the sender will re-transmit each frame up to 7 times as per the IEEE 802.11 standard.)
 
 
-## Build
+## Installation
+
+If you're an Arch Linux user, then you can install `owl` from the
+[`owl-git` AUR package](https://aur.archlinux.org/packages/owl-git/), e.g.,
+
+```sh
+yay -S owl-git
+```
+
+
+## Build from source
 
 The project is build using CMake. To build the project, simply clone this repositry in `<OWLDIR>` and run
 ```sh
