@@ -28,7 +28,6 @@
 #include "sync.h"
 #include "wire.h"
 #include "log.h"
-#include "crc32.h"
 
 #define AWDL_SYNC_THRESHOLD 3
 
@@ -418,7 +417,7 @@ wire_error:
 	return RX_TOO_SHORT;
 }
 
-static int radiotap_parse(const struct buf *frame, signed char *rssi, uint64_t *tsft) {
+static int radiotap_parse(const struct buf *frame, signed char *rssi, uint8_t *flags, uint64_t *tsft) {
 	struct ieee80211_radiotap_iterator iter;
 	int err;
 
@@ -433,6 +432,10 @@ static int radiotap_parse(const struct buf *frame, signed char *rssi, uint64_t *
 				case IEEE80211_RADIOTAP_TSFT: /* https://www.radiotap.org/fields/TSFT.html */
 					if (tsft)
 						*tsft = le64toh(*(uint64_t *) iter.this_arg);
+					break;
+				case IEEE80211_RADIOTAP_FLAGS:
+					if (flags)
+						*flags = *(unsigned char *) iter.this_arg;
 					break;
 				case IEEE80211_RADIOTAP_DBM_ANTSIGNAL: /* https://www.radiotap.org/fields/Antenna%20signal.html */
 					if (rssi)
@@ -450,31 +453,31 @@ static int radiotap_parse(const struct buf *frame, signed char *rssi, uint64_t *
 	return RX_OK;
 }
 
+static int check_fcs(const struct buf *frame, uint8_t radiotap_flags) {
+	if (radiotap_flags & IEEE80211_RADIOTAP_F_BADFCS)
+		return -1;
+	if (radiotap_flags & IEEE80211_RADIOTAP_F_FCS)
+		BUF_TAKE(frame, 4); /* strip FCS */
+	return 0;
+wire_error:
+	return -1;
+}
+
 int awdl_rx(const struct buf *frame, struct buf ***data_frame, struct awdl_state *state) {
 	const struct ieee80211_hdr *ieee80211;
 	const struct ether_addr *from, *to;
 	uint16_t fc, qosc; /* frame and QoS control */
 	signed char rssi;
 	uint64_t tsft;
-#ifdef __APPLE__
-	uint32_t crc_orig, crc_calc;
-#endif /* __APPLE__ */
+	uint8_t flags;
 
 	tsft = clock_time_us(); /* TODO Radiotap TSFT is more accurate but then need to access TSF in clock_time_us() */
-	if (radiotap_parse(frame, &rssi, NULL /* &tsft */) < 0)
+	if (radiotap_parse(frame, &rssi, &flags, NULL /* &tsft */) < 0)
 		return RX_UNEXPECTED_FORMAT;
 	BUF_STRIP(frame, le16toh(((const struct ieee80211_radiotap_header *) buf_data(frame))->it_len));
 
-#ifdef __APPLE__
-	/* monitor mode under macOS accepts frames with invalid CRC */
-	READ_LE32(frame, buf_len(frame) - 4, &crc_orig);
-	BUF_TAKE(frame, 4); /* strip CRC32 */
-	crc_calc = crc32(buf_data(frame), buf_len(frame));
-	if (crc_calc != crc_orig)
+	if (check_fcs(frame, flags)) /* note that if no flags are present (flags==0), frames will pass */
 		return RX_IGNORE_FAILED_CRC;
-#else
-		BUF_TAKE(frame, 4); /* strip CRC32 */
-#endif /* __APPLE__ */
 
 	READ_BYTES(frame, 0, NULL, sizeof(struct ieee80211_hdr));
 
