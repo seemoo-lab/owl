@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 	int filter_rssi = 1;
 	int no_monitor_mode = 0;
 
-	char wlan[IFNAMSIZ];
+	char wlan[PATH_MAX];
 	char host[IFNAMSIZ] = DEFAULT_AWDL_DEVICE;
 
 	struct ev_loop *loop;

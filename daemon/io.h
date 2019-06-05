@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <pcap/pcap.h>
 #include <net/if.h>
+#include <limits.h>
 
 #ifdef __APPLE__
 #include <net/ethernet.h>
@@ -32,7 +33,7 @@
 
 struct io_state {
 	pcap_t *wlan_handle;
-	char wlan_ifname[IFNAMSIZ]; /* name of WLAN iface */
+	char wlan_ifname[PATH_MAX]; /* name of WLAN iface */
 	int wlan_ifindex;     /* index of WLAN iface */
 	char host_ifname[IFNAMSIZ]; /* name of host iface */
 	int host_ifindex;     /* index of host iface */
@@ -41,6 +42,7 @@ struct io_state {
 	int host_fd;
 	char *dumpfile;
 	char wlan_no_monitor_mode;
+	int wlan_is_file;
 };
 
 int io_state_init(struct io_state *state, const char *wlan, const char *host, const struct ether_addr *bssid_filter);

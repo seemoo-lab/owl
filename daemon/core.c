@@ -282,7 +282,8 @@ void awdl_switch_channel(struct ev_loop *loop, ev_timer *timer, int revents) {
 
 	if (chan_num_new && (chan_num_new != chan_num_old)) {
 		log_debug("switch channel to %d (slot %d)", chan_num_new, slot);
-		set_channel(state->io.wlan_ifindex, chan_num_new);
+		if (!state->io.wlan_is_file)
+			set_channel(state->io.wlan_ifindex, chan_num_new);
 		awdl_state->channel.current = chan_new;
 	}
 

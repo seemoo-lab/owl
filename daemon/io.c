@@ -104,6 +104,25 @@ static int open_nonblocking_device(const char *dev, pcap_t **pcap_handle, const 
 	return fd;
 }
 
+static int open_savefile(const char *filename, pcap_t **pcap_handle) {
+	char errbuf[PCAP_ERRBUF_SIZE];
+	int fd;
+
+	pcap_t *handle = pcap_open_offline(filename, errbuf);
+	if (!handle) {
+		log_error("pcap: unable to open savefile (%s)", errbuf);
+		return -1;
+	}
+
+	if ((fd = pcap_get_selectable_fd(handle)) == -1) {
+		log_error("pcap: unable to get fd");
+		return -1;
+	}
+
+	*pcap_handle = handle;
+
+	return fd;
+}
 
 static int open_tun(char *dev, const struct ether_addr *self) {
 #ifndef __APPLE__
@@ -240,11 +259,29 @@ static int open_tun(char *dev, const struct ether_addr *self) {
 #endif /* __APPLE__ */
 }
 
-int io_state_init(struct io_state *state, const char *wlan, const char *host, const struct ether_addr *bssid_filter) {
+static int io_state_init_wlan_try_savefile(struct io_state *state) {
 	int err;
 
-	/* setup WLAN interface */
+	state->wlan_fd = open_savefile(state->wlan_ifname, &state->wlan_handle);
+	if ((err = state->wlan_fd) < 0) {
+		log_trace("Could not open device or file: %s", state->wlan_ifname);
+		return err;
+	}
+	state->wlan_is_file = 1;
+	state->wlan_ifindex = 0;
+
+	return 0;
+}
+
+static int io_state_init_wlan(struct io_state *state, const char *wlan, const struct ether_addr *bssid_filter) {
+	int err;
+
 	strcpy(state->wlan_ifname, wlan);
+
+	if (!io_state_init_wlan_try_savefile(state)) {
+		log_info("Using savefile instead of device");
+		return 0;
+	}
 
 	state->wlan_ifindex = if_nametoindex(state->wlan_ifname);
 	if (!state->wlan_ifindex) {
@@ -269,18 +306,22 @@ int io_state_init(struct io_state *state, const char *wlan, const char *host, co
 		return err;
 	}
 	state->wlan_fd = open_nonblocking_device(state->wlan_ifname, &state->wlan_handle, bssid_filter);
-	if ((err = state->wlan_fd) < 0) {
+	if (state->wlan_fd < 0) {
 		log_error("Could not open device: %s", state->wlan_ifname);
 		return err;
 	}
-
 	err = link_ether_addr_get(state->wlan_ifname, &state->if_ether_addr);
 	if (err < 0) {
 		log_error("Could not get LLC address from %s", state->wlan_ifname);
 		return err;
 	}
 
-	/* setup host interface */
+	return 0;
+}
+
+static int io_state_init_host(struct io_state *state, const char *host) {
+	int err;
+
 	if (strlen(host) > 0) {
 		strcpy(state->host_ifname, host);
 		/* Host interface needs to have same ether_addr, to make active (!) monitor mode work */
@@ -297,6 +338,18 @@ int io_state_init(struct io_state *state, const char *wlan, const char *host, co
 	} else {
 		log_debug("No host device given, start without host device");
 	}
+
+	return 0;
+}
+
+int io_state_init(struct io_state *state, const char *wlan, const char *host, const struct ether_addr *bssid_filter) {
+	int err;
+
+	if (!(err = io_state_init_wlan(state, wlan, bssid_filter)))
+		return err;
+
+	if (!(err = io_state_init_host(state, host)))
+		return err;
 
 	return 0;
 }
