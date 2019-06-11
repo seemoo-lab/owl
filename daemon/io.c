@@ -110,12 +110,12 @@ static int open_savefile(const char *filename, pcap_t **pcap_handle) {
 
 	pcap_t *handle = pcap_open_offline(filename, errbuf);
 	if (!handle) {
-		log_error("pcap: unable to open savefile (%s)", errbuf);
+		log_trace("pcap: unable to open savefile (%s)", errbuf);
 		return -1;
 	}
 
 	if ((fd = pcap_get_selectable_fd(handle)) == -1) {
-		log_error("pcap: unable to get fd");
+		log_trace("pcap: unable to get fd");
 		return -1;
 	}
 
@@ -263,10 +263,8 @@ static int io_state_init_wlan_try_savefile(struct io_state *state) {
 	int err;
 
 	state->wlan_fd = open_savefile(state->wlan_ifname, &state->wlan_handle);
-	if ((err = state->wlan_fd) < 0) {
-		log_trace("Could not open device or file: %s", state->wlan_ifname);
+	if ((err = state->wlan_fd) < 0)
 		return err;
-	}
 	state->wlan_is_file = 1;
 	state->wlan_ifindex = 0;
 
@@ -277,6 +275,7 @@ static int io_state_init_wlan(struct io_state *state, const char *wlan, const st
 	int err;
 
 	strcpy(state->wlan_ifname, wlan);
+	state->wlan_is_file = 0;
 
 	if (!io_state_init_wlan_try_savefile(state)) {
 		log_info("Using savefile instead of device");
@@ -345,10 +344,10 @@ static int io_state_init_host(struct io_state *state, const char *host) {
 int io_state_init(struct io_state *state, const char *wlan, const char *host, const struct ether_addr *bssid_filter) {
 	int err;
 
-	if (!(err = io_state_init_wlan(state, wlan, bssid_filter)))
+	if ((err = io_state_init_wlan(state, wlan, bssid_filter)))
 		return err;
 
-	if (!(err = io_state_init_host(state, host)))
+	if ((err = io_state_init_host(state, host)))
 		return err;
 
 	return 0;
