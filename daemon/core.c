@@ -202,6 +202,7 @@ void awdl_send_unicast(struct ev_loop *loop, ev_timer *timer, int revents) {
 	struct daemon_state *state = timer->data;
 	struct awdl_state *awdl_state = &state->awdl_state;
 	uint64_t now = clock_time_us();
+	double in = 0;
 
 	if (state->next) { /* we have something to send */
 		struct awdl_peer *peer;
@@ -212,7 +213,7 @@ void awdl_send_unicast(struct ev_loop *loop, ev_timer *timer, int revents) {
 			buf_free(state->next);
 			state->next = NULL;
 		} else {
-			double in = awdl_can_send_unicast_in(awdl_state, peer, now, AWDL_UNICAST_GUARD_TU);
+			in = awdl_can_send_unicast_in(awdl_state, peer, now, AWDL_UNICAST_GUARD_TU);
 			if (in == 0) { /* send now */
 				awdl_send_data(state->next, &state->io, &state->awdl_state, &state->ieee80211_state);
 				buf_free(state->next);
@@ -220,17 +221,19 @@ void awdl_send_unicast(struct ev_loop *loop, ev_timer *timer, int revents) {
 				state->awdl_state.stats.tx_data_unicast++;
 			} else { /* try later */
 				if (in < 0) /* we are at the end of slot but within guard */
-					in = usec_to_sec(-in + ieee80211_tu_to_usec(AWDL_UNICAST_GUARD_TU));
-				ev_timer_rearm(loop, timer, in);
+					in = -in + usec_to_sec(ieee80211_tu_to_usec(AWDL_UNICAST_GUARD_TU));
 			}
 		}
 	}
 
 	if (!state->next)
+		/* poll for more frames to keep queue full */
 		poll_host_device(state);
+
 	/* rearm if more unicast frames available */
 	if (state->next) {
-		ev_timer_rearm(loop, timer, 0.);
+		log_trace("awdl_send_unicast: retry in %lu TU", ieee80211_usec_to_tu(sec_to_usec(in)));
+		ev_timer_rearm(loop, timer, in);
 	}
 }
 
@@ -239,9 +242,10 @@ void awdl_send_multicast(struct ev_loop *loop, ev_timer *timer, int revents) {
 	struct daemon_state *state = timer->data;
 	struct awdl_state *awdl_state = &state->awdl_state;
 	uint64_t now = clock_time_us();
+	double in = 0;
 
 	if (!circular_buf_empty(state->tx_queue_multicast)) { /* we have something to send */
-		double in = awdl_can_send_in(awdl_state, now, AWDL_MULTICAST_GUARD_TU);
+		in = awdl_can_send_in(awdl_state, now, AWDL_MULTICAST_GUARD_TU);
 		if (awdl_is_multicast_eaw(awdl_state, now) && (in == 0)) { /* we can send now */
 			void *next;
 			circular_buf_get(state->tx_queue_multicast, &next, 0);
@@ -249,18 +253,21 @@ void awdl_send_multicast(struct ev_loop *loop, ev_timer *timer, int revents) {
 			buf_free(next);
 			state->awdl_state.stats.tx_data_multicast++;
 		} else { /* try later */
-			if (in < 0) /* we are at the end of slot but within guard */
-				in = usec_to_sec(-in + ieee80211_tu_to_usec(AWDL_MULTICAST_GUARD_TU));
-			ev_timer_rearm(loop, timer, in);
+			if (in == 0) /* try again next EAW */
+				in = usec_to_sec(ieee80211_tu_to_usec(64));
+			else if (in < 0) /* we are at the end of slot but within guard */
+				in = -in + usec_to_sec(ieee80211_tu_to_usec(AWDL_MULTICAST_GUARD_TU));
 		}
 	}
+
 	if (circular_buf_empty(state->tx_queue_multicast))
 		/* poll for more frames to keep queue full */
 		poll_host_device(state);
 
 	/* rearm if more multicast frames available */
 	if (!circular_buf_empty(state->tx_queue_multicast)) {
-		ev_timer_rearm(loop, timer, 0.);
+		log_trace("awdl_send_multicast: retry in %lu TU", ieee80211_usec_to_tu(sec_to_usec(in)));
+		ev_timer_rearm(loop, timer, in);
 	}
 }
 

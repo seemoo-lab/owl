@@ -30,6 +30,8 @@
 
 double usec_to_sec(uint64_t usec);
 
+uint64_t sec_to_usec(double sec);
+
 /**
  * @brief Determine whether we are on the same non-zero channel as {@code peer}.
  * @param state our state

@@ -23,6 +23,10 @@ double usec_to_sec(uint64_t usec) {
 	return usec / 1000000.;
 }
 
+uint64_t sec_to_usec(double sec) {
+	return sec * 1000000;
+}
+
 bool awdl_same_channel_as_peer(const struct awdl_state *state, uint64_t now, const struct awdl_peer *peer) {
 	int own_slot, peer_slot;
 	int own_chan, peer_chan;
@@ -56,7 +60,7 @@ double awdl_can_send_unicast_in(const struct awdl_state *state, const struct awd
 	uint64_t eaw = ieee80211_tu_to_usec(64);
 
 	if (!awdl_same_channel_as_peer(state, now, peer))
-		return next_aw; /* try again in the next slot */
+		return usec_to_sec(next_aw); /* try again in the next slot */
 
 	if (next_aw < _guard) { /* we are at the end of slot */
 		if (awdl_same_channel_as_peer(state, now + eaw, peer)) {
