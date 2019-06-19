@@ -77,6 +77,8 @@ void awdl_election_run(struct awdl_election_state *state, const struct awdl_peer
 	while (awdl_peers_it_next(it, &peer) == PEERS_OK) {
 		int cmp_metric;
 		struct awdl_election_state *peer_state = &peer->election;
+		if (!peer->is_valid)
+			continue; /* reject: not a valid peer */
 		if (peer_state->height + 1 > AWDL_ELECTION_TREE_MAX_HEIGHT) {
 			log_debug("Ignore peer %s because sync tree would get too large (%u, max %u)",
 			          ether_ntoa(&peer_state->self_addr), peer_state->height + 1, AWDL_ELECTION_TREE_MAX_HEIGHT);
