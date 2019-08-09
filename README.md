@@ -45,7 +45,10 @@ On Debian Linux, install all dependencies via
 ```sh
 sudo apt install libpcap-dev libev-dev libnl-3-dev libnl-genl-3-dev libnl-route-3-dev
 ```
-
+On macOS, you need to add support for tun/tap devices, e.g., via [tuntaposx](http://tuntaposx.sourceforge.net). You can install it via [Homebrew](https://brew.sh):
+```sh
+brew cask install tuntap
+```
 
 ## Use
 
