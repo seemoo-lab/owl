@@ -55,7 +55,7 @@ brew cask install tuntap
 Simply run
 
 ```sh
-owl -i <WLAN_IFACE>
+sudo owl -i <WLAN_IFACE>
 ```
 
 You may increase the log level with `-v` and `-vv` and daemonize the program with `-D`. For other options, have a look at `daemon/owl.c`.
