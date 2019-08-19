@@ -41,9 +41,14 @@ sudo make install
 ```
 
 OWL requires `libpcap` for frame injection and reception, `libev` for event handling, and `libnl` (Linux only) for interactions with the system's networking stack which have to be installed on the target system.
-On Debian Linux, install all dependencies via
+
+On Debian Linux,
 ```sh
 sudo apt install libpcap-dev libev-dev libnl-3-dev libnl-genl-3-dev libnl-route-3-dev
+```
+On Fedora,
+```sh
+sudo dnf install libpcap-devel libev-devel libnl3-devel
 ```
 On macOS, you need to add support for tun/tap devices, e.g., via [tuntaposx](http://tuntaposx.sourceforge.net). You can install it via [Homebrew](https://brew.sh):
 ```sh
