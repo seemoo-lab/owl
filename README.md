@@ -14,7 +14,7 @@ OWL is not affiliated with or endorsed by Apple Inc. Use this code at your own r
 
 ## Requirements
 
-To use OWL, you will need a Wi-Fi card supporting active monitor mode with frame injection. We recommend the Atheros AR9280 chip (IEEE 802.11n) which we used to develop and test this code. (Configurations that do not support active monitor mode, i.e., ACK received frames, might suffer from throughput degradation because the sender will re-transmit each frame up to 7 times as per the IEEE 802.11 standard.)
+To use OWL, you will need a Wi-Fi card supporting active monitor mode with frame injection. We recommend the Atheros AR9280 chip (IEEE 802.11n) which we used to develop and test this code. Configurations that do not support *active* monitor mode, i.e., ACK received frames, might suffer from throughput degradation because the sender will re-transmit each frame up to 7 times as per the IEEE 802.11 standard. Have a look at [this issue](https://github.com/seemoo-lab/owl/issues/9) if you want to find out whether your card meets the requirements.
 
 
 ## Installation
