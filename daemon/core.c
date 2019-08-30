@@ -208,7 +208,12 @@ void awdl_send_unicast(struct ev_loop *loop, ev_timer *timer, int revents) {
 		struct awdl_peer *peer;
 		struct ether_addr dst;
 		read_ether_addr(state->next, ETHER_DST_OFFSET, &dst);
-		if (awdl_peer_get(awdl_state->peers.peers, &dst, &peer) < 0) {
+		if (compare_ether_addr(&dst, &awdl_state->self_address) == 0) {
+			/* send back to self */
+			host_send(&state->io, buf_data(state->next), buf_len(state->next));
+			buf_free(state->next);
+			state->next = NULL;
+		} else if (awdl_peer_get(awdl_state->peers.peers, &dst, &peer) < 0) {
 			log_debug("Drop frame to non-peer %s", ether_ntoa(&dst));
 			buf_free(state->next);
 			state->next = NULL;
