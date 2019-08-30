@@ -295,6 +295,10 @@ int awdl_init_version_tlv(uint8_t *buf, const struct awdl_state *state) {
 }
 
 int ieee80211_init_radiotap_header(uint8_t *buf) {
+	/*
+	 * TX radiotap headers and mac80211
+	 * https://www.kernel.org/doc/Documentation/networking/mac80211-injection.txt
+	 */
 	struct ieee80211_radiotap_header *hdr = (struct ieee80211_radiotap_header *) buf;
 	uint8_t *ptr = buf + sizeof(struct ieee80211_radiotap_header);
 	uint32_t present = 0;
@@ -304,12 +308,8 @@ int ieee80211_init_radiotap_header(uint8_t *buf) {
 
 	/* TODO Adjust PHY parameters based on receiver capabilities */
 
-	present |= ieee80211_radiotap_type_to_mask(IEEE80211_RADIOTAP_FLAGS);
-	*ptr = htole16(IEEE80211_RADIOTAP_F_SHORTPRE);
-	ptr += sizeof(uint8_t);
-
 	present |= ieee80211_radiotap_type_to_mask(IEEE80211_RADIOTAP_RATE);
-	*ptr = htole16(ieee80211_radiotap_rate_to_val(54));
+	*ptr = htole16(ieee80211_radiotap_rate_to_val(12));
 	ptr += sizeof(uint8_t);
 
 	hdr->it_len = htole16((uint16_t) (ptr - buf));
