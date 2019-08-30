@@ -69,6 +69,7 @@ void wlan_device_ready(struct ev_loop *loop, ev_io *handle, int revents) {
 
 static int poll_host_device(struct daemon_state *state) {
 	struct buf *buf = NULL;
+	int result = 0;
 	while (!state->next && !circular_buf_full(state->tx_queue_multicast)) {
 		buf = buf_new_owned(ETHER_MAX_LEN);
 		int len = buf_len(buf);
@@ -82,13 +83,14 @@ static int poll_host_device(struct daemon_state *state) {
 			is_multicast = dst.ether_addr_octet[0] & 0x01;
 			if (is_multicast) {
 				circular_buf_put(state->tx_queue_multicast, buf);
-				return POLL_NEW_MULTICAST;
+				result |= POLL_NEW_MULTICAST;
 			} else { /* unicast */
 				state->next = buf;
-				return POLL_NEW_UNICAST;
+				result |= POLL_NEW_UNICAST;
 			}
 		}
 	}
+	return result;
 wire_error:
 	if (buf)
 		buf_free(buf);
@@ -101,10 +103,10 @@ void host_device_ready(struct ev_loop *loop, ev_io *handle, int revents) {
 	struct daemon_state *state = handle->data;
 
 	int poll_result = poll_host_device(state); /* fill TX queues */
-	if (poll_result & POLL_NEW_UNICAST)
-		awdl_send_unicast(loop, &state->ev_state.tx_timer, 0);
 	if (poll_result & POLL_NEW_MULTICAST)
 		awdl_send_multicast(loop, &state->ev_state.tx_mcast_timer, 0);
+	if (poll_result & POLL_NEW_UNICAST)
+		awdl_send_unicast(loop, &state->ev_state.tx_timer, 0);
 }
 
 void awdl_receive_frame(uint8_t *user, const struct pcap_pkthdr *hdr, const uint8_t *buf) {
@@ -231,14 +233,13 @@ void awdl_send_unicast(struct ev_loop *loop, ev_timer *timer, int revents) {
 		}
 	}
 
-	if (!state->next)
-		/* poll for more frames to keep queue full */
-		poll_host_device(state);
-
 	/* rearm if more unicast frames available */
 	if (state->next) {
 		log_trace("awdl_send_unicast: retry in %lu TU", ieee80211_usec_to_tu(sec_to_usec(in)));
 		ev_timer_rearm(loop, timer, in);
+	} else {
+		/* poll for more frames to keep queue full */
+		ev_feed_event(loop, &state->ev_state.read_host, 0);
 	}
 }
 
@@ -265,14 +266,13 @@ void awdl_send_multicast(struct ev_loop *loop, ev_timer *timer, int revents) {
 		}
 	}
 
-	if (circular_buf_empty(state->tx_queue_multicast))
-		/* poll for more frames to keep queue full */
-		poll_host_device(state);
-
 	/* rearm if more multicast frames available */
 	if (!circular_buf_empty(state->tx_queue_multicast)) {
 		log_trace("awdl_send_multicast: retry in %lu TU", ieee80211_usec_to_tu(sec_to_usec(in)));
 		ev_timer_rearm(loop, timer, in);
+	} else {
+		/* poll for more frames to keep queue full */
+		ev_feed_event(loop, &state->ev_state.read_host, 0);
 	}
 }
 
