@@ -20,10 +20,10 @@ To use OWL, you will need a Wi-Fi card supporting active monitor mode with frame
 ## Installation
 
 If you're an Arch Linux user, then you can install `owl` from the
-[`owl-git` AUR package](https://aur.archlinux.org/packages/owl-git/), e.g.,
+[`owlink-git` AUR package](https://aur.archlinux.org/packages/owlink-git/), e.g.,
 
 ```sh
-yay -S owl-git
+yay -S owlink-git
 ```
 
 
