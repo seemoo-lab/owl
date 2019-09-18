@@ -14,7 +14,15 @@ OWL is not affiliated with or endorsed by Apple Inc. Use this code at your own r
 
 ## Requirements
 
+### Active frame injection
+
 To use OWL, you will need a Wi-Fi card supporting active monitor mode with frame injection. We recommend the Atheros AR9280 chip (IEEE 802.11n) which we used to develop and test this code. Configurations that do not support *active* monitor mode, i.e., ACK received frames, might suffer from throughput degradation because the sender will re-transmit each frame up to 7 times as per the IEEE 802.11 standard. Have a look at [this issue](https://github.com/seemoo-lab/owl/issues/9) if you want to find out whether your card meets the requirements.
+
+### Regulatory domain
+
+To use OWL, you will need to ensure that the regulatory domain is correctly configured on your wireless adapter, otherwise your wireless driver will likely refuse to transmit frames in active monitor mode.
+
+Check that your regulatory domain is configured correctly using `iw reg get`. If the tool returns `DFS-UNSET` then you will need to configure your regulatory domain correctly before OWL will work - most distributions have a `wireless-regdb` (or similar) package.
 
 
 ## Installation
@@ -66,6 +74,8 @@ sudo owl -i <WLAN_IFACE>
 You may increase the log level with `-v` and `-vv` and daemonize the program with `-D`. For other options, have a look at `daemon/owl.c`.
 
 When started, OWL creates a virtual network interface `awdl0` with a link-local IPv6 address. Discovered AWDL peers are automatically added (and removed) to (and from) the system's neighbor table. Run `ip n` to see a list of all current neighbors.
+
+You may need to specify a wireless channel using the `-c` parameter - available channels are 6, 44 and 149. Note that only some of these channels may be available for use in your country based on your regulatory domain (see above). On Linux you can check this using `iw list` and looking in the `Frequencies` section - a channel is not available for use in your country if it is listed as `disabled` or `no IR`.
 
 
 ## Architecture
