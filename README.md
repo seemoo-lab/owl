@@ -2,7 +2,7 @@
 
 Open Wireless Link (OWL) is an open implementation of the Apple Wireless Direct Link (AWDL) ad hoc protocol for Linux and macOS written in C and part of the [Open Wireless Link project](https://owlink.org).
 
-OWL runs in userspace and makes use of Linux’s Netlink API for Wi-Fi specific operations such as channel switching and to integrate itself in the Linux networking stack by providing a virtual network interface such that existing IPv6-capable programs can use AWDL without modification.
+OWL runs in user space and makes use of Linux’s Netlink API for Wi-Fi specific operations such as channel switching and to integrate itself in the Linux networking stack by providing a virtual network interface such that existing IPv6-capable programs can use AWDL without modification.
 
 
 ## Disclaimer
@@ -29,7 +29,7 @@ yay -S owlink-git
 
 ## Build from source
 
-The project is build using CMake. To build the project, simply clone this repositry in `<OWLDIR>` and run
+The project is build using CMake. To build the project, simply clone this repository in `<OWLDIR>` and run
 ```sh
 cd <OWLDIR>
 git submodule update --init
@@ -46,12 +46,13 @@ On Debian Linux,
 ```sh
 sudo apt install libpcap-dev libev-dev libnl-3-dev libnl-genl-3-dev libnl-route-3-dev
 ```
-On Fedora,
+On Fedora Linux,
 ```sh
 sudo dnf install libpcap-devel libev-devel libnl3-devel
 ```
-On macOS, you need to add support for tun/tap devices, e.g., via [tuntaposx](http://tuntaposx.sourceforge.net). You can install it via [Homebrew](https://brew.sh):
+On macOS, you need to add support for tun/tap devices, e.g., via [tuntaposx](http://tuntaposx.sourceforge.net). You can install everything via [Homebrew](https://brew.sh):
 ```sh
+brew install libpcap libev
 brew cask install tuntap
 ```
 
@@ -85,7 +86,7 @@ We provide a coarse structure of the most important components and files to faci
   * `netutils.{c,h}`  Platform-specific functions to interact with the system's networking stack.
   * `owl.c` Contains `main()` and sets up the `core` based on user arguments.
 * `googletest/` The runtime for running the tests.
-* `radiotap/` Library for parsing Radiotap headers.
+* `radiotap/` Library for parsing radiotap headers.
 * `src/` Contains platform-independent AWDL code.
   * `channel.{c,h}` Utilities for managing the channel sequence.
   * `election.{c,h}` Code for running the election process.
@@ -94,7 +95,7 @@ We provide a coarse structure of the most important components and files to faci
   * `rx.{c,h}` Functions for handling a received data and action frames including parsing TLVs.
   * `schedule.{c,h}` Functions to determine *when* and *which* frames should be sent.
   * `state.{c,h}` Consolidates the AWDL state.
-  * `sync.{c,h}` Synchronization: mangaging (extended) availability windows.
+  * `sync.{c,h}` Synchronization: managing (extended) availability windows.
   * `tx.{c,h}` Crafting valid data and action frames ready for transmission.
   * `version.{c,h}` Parse and create AWDL version numbers.
   * `wire.{c,h}` Mini-library for safely reading and writing primitives types from and to a frame buffer.
@@ -105,7 +106,7 @@ We provide a coarse structure of the most important components and files to faci
 ## Current Limitations/TODOs
 
 * OWL uses static election metric and counter values, so it either takes part as a slave (low values) or wins the election (high values). See `AWDL_ELECTION_METRIC_INIT` and `AWDL_ELECTION_COUNTER_INIT` and in `include/election.h`.
-* The channel sequence does not adjust itself automatically to current network load and/or other triggers. This would require a better understanding of Apple's implementation. Currently, the channel sequence is fixed when initalizing. See `awdl_chanseq_init_static()` in `src/state.{c,h}`.
+* The channel sequence does not adjust itself automatically to current network load and/or other triggers. This would require a better understanding of Apple's implementation. Currently, the channel sequence is fixed when initializing. See `awdl_chanseq_init_static()` in `src/state.{c,h}`.
 * OWL does not allow a concurrent connection to an AP. This means, that when started, the Wi-Fi interface exclusively uses AWDL. To work around this, OWL could create a new monitor interface (instead of making the Wi-Fi interface one) and adjust its channel sequence to include the channel of the AP network.
 
 
