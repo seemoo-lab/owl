@@ -1,0 +1,30 @@
+name: Build and test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install dependencies
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt install libpcap-dev libev-dev libnl-3-dev libnl-genl-3-dev libnl-route-3-dev
+    - name: Install dependencies
+      if: startsWith(matrix.os, 'macos')
+      run: brew install libpcap libev
+    - name: Checkout submodules
+      run: git submodule update --init
+    - name: Create build directory
+      run: mkdir build
+    - name: CMake
+      run: cd build && cmake ..
+    - name: make
+      run: cd build && make
+    - name: Run tests
+      run: build/tests/tests
