@@ -76,7 +76,7 @@ enum peers_status awdl_peer_remove(awdl_peers_t peers, const struct ether_addr *
 
 enum peers_status awdl_peer_get(awdl_peers_t peers, const struct ether_addr *addr, struct awdl_peer **peer);
 
-int awdl_peer_print(const struct awdl_peer *peer, char *str, size_t len);
+int awdl_peer_print(const struct awdl_peer *peer, char *str, int len);
 
 /**
  * Apply callback to and then remove all peers matching a filter
@@ -87,7 +87,7 @@ int awdl_peer_print(const struct awdl_peer *peer, char *str, size_t len);
  */
 void awdl_peers_remove(awdl_peers_t peers, uint64_t before, awdl_peer_cb cb, void *arg);
 
-int awdl_peers_print(awdl_peers_t peers, char *str, size_t len);
+int awdl_peers_print(awdl_peers_t peers, char *str, int len);
 
 /* Iterator functions */
 typedef void *awdl_peers_it_t;
