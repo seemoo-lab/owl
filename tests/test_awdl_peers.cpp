@@ -23,8 +23,10 @@ extern "C" {
 
 #include "gtest/gtest.h"
 
-static const struct ether_addr TEST_ADDR = {{ 0xc0, 0xff, 0xee,  0xc0, 0xff, 0xee }};
-static const struct ether_addr TEST_ADDR2 = {{ 0xc0, 0xff, 0xff, 0xc0, 0xff, 0xff }};
+#define TEST_ADDR(i) static const struct ether_addr TEST_ADDR##i = {{ i, i, i, i, i, i }}
+
+TEST_ADDR(0);
+TEST_ADDR(1);
 
 TEST(awdl_peers, init_free) {
 	awdl_peers_t p = awdl_peers_init();
@@ -36,7 +38,7 @@ TEST(awdl_peers, init_free) {
 TEST(awdl_peers, add) {
 	int s;
 	awdl_peers_t p = awdl_peers_init();
-	s = awdl_peer_add(p, &TEST_ADDR, 0, NULL, NULL);
+	s = awdl_peer_add(p, &TEST_ADDR0, 0, NULL, NULL);
 	EXPECT_EQ(s, PEERS_OK);
 	EXPECT_EQ(awdl_peers_length(p), 1);
 	awdl_peers_free(p);
@@ -45,10 +47,10 @@ TEST(awdl_peers, add) {
 TEST(awdl_peers, add_two) {
 	int s;
 	awdl_peers_t p = awdl_peers_init();
-	s = awdl_peer_add(p, &TEST_ADDR, 0, NULL, NULL);
+	s = awdl_peer_add(p, &TEST_ADDR0, 0, NULL, NULL);
 	EXPECT_EQ(s, PEERS_OK);
 	EXPECT_EQ(awdl_peers_length(p), 1);
-	s = awdl_peer_add(p, &TEST_ADDR2, 0, NULL, NULL);
+	s = awdl_peer_add(p, &TEST_ADDR1, 0, NULL, NULL);
 	EXPECT_EQ(s, PEERS_OK);
 	EXPECT_EQ(awdl_peers_length(p), 2);
 	awdl_peers_free(p);
@@ -57,10 +59,10 @@ TEST(awdl_peers, add_two) {
 TEST(awdl_peers, add_same) {
 	int s;
 	awdl_peers_t p = awdl_peers_init();
-	s = awdl_peer_add(p, &TEST_ADDR, 0, NULL, NULL);
+	s = awdl_peer_add(p, &TEST_ADDR0, 0, NULL, NULL);
 	EXPECT_EQ(s, PEERS_OK);
 	EXPECT_EQ(awdl_peers_length(p), 1);
-	s = awdl_peer_add(p, &TEST_ADDR, 0, NULL, NULL);
+	s = awdl_peer_add(p, &TEST_ADDR0, 0, NULL, NULL);
 	EXPECT_EQ(s, PEERS_UPDATE);
 	EXPECT_EQ(awdl_peers_length(p), 1);
 	awdl_peers_free(p);
@@ -69,8 +71,8 @@ TEST(awdl_peers, add_same) {
 TEST(awdl_peers, remove) {
 	int s;
 	awdl_peers_t p = awdl_peers_init();
-	awdl_peer_add(p, &TEST_ADDR, 0, NULL, NULL);
-	s = awdl_peer_remove(p, &TEST_ADDR, NULL, NULL);
+	awdl_peer_add(p, &TEST_ADDR0, 0, NULL, NULL);
+	s = awdl_peer_remove(p, &TEST_ADDR0, NULL, NULL);
 	EXPECT_EQ(s, PEERS_OK);
 	EXPECT_EQ(awdl_peers_length(p), 0);
 	awdl_peers_free(p);
@@ -79,7 +81,7 @@ TEST(awdl_peers, remove) {
 TEST(awdl_peers, remove_empty) {
 	int s;
 	awdl_peers_t p = awdl_peers_init();
-	s = awdl_peer_remove(p, &TEST_ADDR, NULL, NULL);
+	s = awdl_peer_remove(p, &TEST_ADDR0, NULL, NULL);
 	EXPECT_EQ(s, PEERS_MISSING);
 	EXPECT_EQ(awdl_peers_length(p), 0);
 	awdl_peers_free(p);
@@ -88,9 +90,9 @@ TEST(awdl_peers, remove_empty) {
 TEST(awdl_peers, remove_twice) {
 	int s;
 	awdl_peers_t p = awdl_peers_init();
-	awdl_peer_add(p, &TEST_ADDR, 0, NULL, NULL);
-	awdl_peer_remove(p, &TEST_ADDR, NULL, NULL);
-	s = awdl_peer_remove(p, &TEST_ADDR, NULL, NULL);
+	awdl_peer_add(p, &TEST_ADDR0, 0, NULL, NULL);
+	awdl_peer_remove(p, &TEST_ADDR0, NULL, NULL);
+	s = awdl_peer_remove(p, &TEST_ADDR0, NULL, NULL);
 	EXPECT_EQ(s, PEERS_MISSING);
 	EXPECT_EQ(awdl_peers_length(p), 0);
 	awdl_peers_free(p);
@@ -101,15 +103,15 @@ static int count_cb = 0;
 static void test_cb(struct awdl_peer *p, void *ignore) {
 	(void) ignore;
 	count_cb++;
-	EXPECT_TRUE(!memcmp(&TEST_ADDR, &p->addr, sizeof(struct ether_addr)));
+	EXPECT_TRUE(!memcmp(&TEST_ADDR0, &p->addr, sizeof(struct ether_addr)));
 }
 
 TEST(awdl_peers, remove_timedout) {
 	struct awdl_peer *peer = NULL;
 	uint64_t now = 0;
 	awdl_peers_t p = awdl_peers_init();
-	awdl_peer_add(p, &TEST_ADDR, now, NULL, NULL);
-	awdl_peer_get(p, &TEST_ADDR, &peer);
+	awdl_peer_add(p, &TEST_ADDR0, now, NULL, NULL);
+	awdl_peer_get(p, &TEST_ADDR0, &peer);
 	peer->is_valid = 1;
 	EXPECT_EQ(awdl_peers_length(p), 1);
 	awdl_peers_remove(p, now, test_cb, NULL);
@@ -120,4 +122,26 @@ TEST(awdl_peers, remove_timedout) {
 	EXPECT_EQ(awdl_peers_length(p), 0);
 	EXPECT_EQ(count_cb, 1);
 	awdl_peers_free(p);
+}
+
+TEST(awdl_peers, print) {
+	char buf[1000]; // Buffer is large enough
+	awdl_peers_t p = awdl_peers_init();
+	awdl_peer_add(p, &TEST_ADDR0, 0, NULL, NULL);
+	awdl_peer_add(p, &TEST_ADDR1, 0, NULL, NULL);
+	int len = awdl_peers_print(p, buf, sizeof(buf));
+	EXPECT_EQ(len, strlen(buf));
+	EXPECT_STREQ(buf, "<UNNAMED>: 0:0:0:0:0:0 (met 60, ctr 0)\n"
+	                  "<UNNAMED>: 1:1:1:1:1:1 (met 60, ctr 0)\n");
+}
+
+TEST(awdl_peers, print_overflow) {
+	char buf[30]; // Buffer is too small
+	awdl_peers_t p = awdl_peers_init();
+	awdl_peer_add(p, &TEST_ADDR0, 0, NULL, NULL);
+	awdl_peer_add(p, &TEST_ADDR1, 0, NULL, NULL);
+	int len = awdl_peers_print(p, buf, sizeof(buf));
+	EXPECT_GT(len, strlen(buf)); // would have written more
+	EXPECT_EQ(strlen(buf), sizeof(buf) - 1); // buffer is full
+    EXPECT_STREQ(buf, "<UNNAMED>: 0:0:0:0:0:0 (met 6");
 }

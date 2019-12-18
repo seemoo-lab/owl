@@ -45,7 +45,7 @@ void awdl_election_state_init(struct awdl_election_state *state, const struct et
 
 void awdl_election_run(struct awdl_election_state *state, const struct awdl_peer_state *peers);
 
-int awdl_election_tree_print(const struct awdl_election_state *state, char *str, size_t len);
+int awdl_election_tree_print(const struct awdl_election_state *state, char *str, int len);
 
 /* Util functions */
 int compare_ether_addr(const struct ether_addr *a, const struct ether_addr *b);

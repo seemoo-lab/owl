@@ -142,29 +142,29 @@ enum peers_status awdl_peer_get(awdl_peers_t peers, const struct ether_addr *_ad
 	return PEERS_OK;
 }
 
-int awdl_peer_print(const struct awdl_peer *peer, char *str, size_t len) {
+int awdl_peer_print(const struct awdl_peer *peer, char *str, int len) {
 	char *cur = str, *const end = str + len;
 	if (strlen(peer->name))
-		cur += snprintf(cur, end - cur, "%s: ", peer->name);
+		cur += snprintf(cur, cur < end ? end - cur : 0, "%s: ", peer->name);
 	else
-		cur += snprintf(cur, end - cur, "<UNNAMED>: ");
-	cur += awdl_election_tree_print(&peer->election, cur, end - cur);
-	return end - cur;
+		cur += snprintf(cur, cur < end ? end - cur : 0, "<UNNAMED>: ");
+    cur += awdl_election_tree_print(&peer->election, cur, end - cur);
+	return cur - str;
 }
 
-int awdl_peers_print(awdl_peers_t peers, char *str, size_t len) {
+int awdl_peers_print(awdl_peers_t peers, char *str, int len) {
 	char *cur = str, *const end = str + len;
 	map_t map = (map_t) peers;
 	map_it_t it = hashmap_it_new(map);
 	struct awdl_peer *peer;
 
 	while (hashmap_it_next(it, NULL, (any_t *) &peer) == MAP_OK) {
-		cur += awdl_peer_print(peer, cur, end - cur);
-		cur += snprintf(cur, end - cur, "\n");
-	}
+        cur += awdl_peer_print(peer, cur, end - cur);
+        cur += snprintf(cur, cur < end ? end - cur : 0, "\n");
+    }
 
 	hashmap_it_free(it);
-	return end - cur;
+	return cur - str;
 }
 
 void awdl_peers_remove(awdl_peers_t peers, uint64_t before, awdl_peer_cb cb, void *arg) {

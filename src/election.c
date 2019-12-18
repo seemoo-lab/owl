@@ -119,17 +119,17 @@ void awdl_election_run(struct awdl_election_state *state, const struct awdl_peer
 	}
 }
 
-int awdl_election_tree_print(const struct awdl_election_state *state, char *str, size_t len) {
+int awdl_election_tree_print(const struct awdl_election_state *state, char *str, int len) {
 	char *cur = str, *const end = str + len;
-	cur += snprintf(cur, end - cur, "%s", ether_ntoa(&state->self_addr));
+	cur += snprintf(cur, cur < end ? end - cur: 0, "%s", ether_ntoa(&state->self_addr));
 	if (state->height > 0)
-		cur += snprintf(cur, end - cur, " -> %s", ether_ntoa(&state->sync_addr));
+		cur += snprintf(cur, cur < end ? end - cur : 0, " -> %s", ether_ntoa(&state->sync_addr));
 	if (state->height > 1) {
-		cur += snprintf(cur, end - cur, " ");
+		cur += snprintf(cur, cur < end ? end - cur : 0, " ");
 		for (uint32_t i = 1; i < state->height; i++)
-			cur += snprintf(cur, end - cur, "-"); /* one dash for every intermediate hop */
-		cur += snprintf(cur, end - cur, "> %s", ether_ntoa(&state->master_addr));
+			cur += snprintf(cur, cur < end ? end - cur : 0, "-"); /* one dash for every intermediate hop */
+		cur += snprintf(cur, cur < end ? end - cur : 0, "> %s", ether_ntoa(&state->master_addr));
 	}
-	cur += snprintf(cur, end - cur, " (met %u, ctr %u)", state->master_metric, state->master_counter);
+	cur += snprintf(cur, cur < end ? end - cur : 0, " (met %u, ctr %u)", state->master_metric, state->master_counter);
 	return cur - str;
 }
