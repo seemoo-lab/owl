@@ -4,6 +4,7 @@ Open Wireless Link (OWL) is an open implementation of the Apple Wireless Direct 
 
 OWL runs in user space and makes use of Linux’s Netlink API for Wi-Fi specific operations such as channel switching and to integrate itself in the Linux networking stack by providing a virtual network interface such that existing IPv6-capable programs can use AWDL without modification.
 
+You can use OWL to in combination with [OpenDrop](https://github.com/seemoo-lab/opendrop) to enable *Apple AirDrop* functionality on Linux-based systems [such as a Raspberry Pi 3](https://owlink.org/2019/05/16/howto-use-airdrop-on-raspberry-pi-3.html).
 
 ## Disclaimer
 
@@ -14,7 +15,9 @@ OWL is not affiliated with or endorsed by Apple Inc. Use this code at your own r
 
 ## Requirements
 
-To use OWL, you will need a Wi-Fi card supporting active monitor mode with frame injection. We recommend the Atheros AR9280 chip (IEEE 802.11n) which we used to develop and test this code. Configurations that do not support *active* monitor mode, i.e., ACK received frames, might suffer from throughput degradation because the sender will re-transmit each frame up to 7 times as per the IEEE 802.11 standard. Have a look at [this issue](https://github.com/seemoo-lab/owl/issues/9) if you want to find out whether your card meets the requirements.
+**Wi-Fi card with *active* monitor mode.** To use OWL, you will need a Wi-Fi card supporting active monitor mode with frame injection. We recommend the Atheros AR9280 chip (IEEE 802.11n) which we used to develop and test this code. Configurations that do not support *active* monitor mode, i.e., ACK received frames, might suffer from throughput degradation because the sender will re-transmit each frame up to 7 times as per the IEEE 802.11 standard. Have a look at [issue #9](https://github.com/seemoo-lab/owl/issues/9) if you want to find out whether your card meets the requirements.
+
+**No support for virtual machines and WSL.** OWL requires direct access to the Wi-Fi card which means that virtualized environments (except with USB or PCIe passthrough) and Windows Subsystem for Linux (WSL, see [issue #8](https://github.com/seemoo-lab/owl/issues/8)), are *not supported*.
 
 
 ## Installation
