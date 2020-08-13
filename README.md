@@ -68,6 +68,7 @@ sudo owl -i <WLAN_IFACE>
 ```
 
 You may increase the log level with `-v` and `-vv` and daemonize the program with `-D`. For other options, have a look at `daemon/owl.c`.
+**Warning:** do not use the `-N` flag in setups without Nexmon such as [this](https://owlink.org/2019/05/16/howto-use-airdrop-on-raspberry-pi-3.html) as it will likely [cause several problems](https://github.com/seemoo-lab/owl/issues/12#issuecomment-673651362).
 
 When started, OWL creates a virtual network interface `awdl0` with a link-local IPv6 address. Discovered AWDL peers are automatically added (and removed) to (and from) the system's neighbor table. Run `ip n` to see a list of all current neighbors.
 
