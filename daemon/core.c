@@ -94,7 +94,7 @@ static int poll_host_device(struct daemon_state *state) {
 wire_error:
 	if (buf)
 		buf_free(buf);
-	return 0;
+	return result;
 }
 
 void host_device_ready(struct ev_loop *loop, ev_io *handle, int revents) {
