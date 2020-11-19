@@ -290,7 +290,7 @@ static int io_state_init_wlan(struct io_state *state, const char *wlan, const st
 	/* TODO we might instead open a new monitor interface instead */
 	err = link_down(state->wlan_ifindex);
 	if (err < 0) {
-		log_error("Could set link down: %", state->wlan_ifname);
+		log_error("Could not set link down: %", state->wlan_ifname);
 		return err;
 	}
 	if (!state->wlan_no_monitor_mode) /* if device is already in monitor mode */
