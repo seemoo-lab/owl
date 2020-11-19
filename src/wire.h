@@ -60,7 +60,7 @@
  */
 struct buf;
 
-/* FIXME change interface: only return wire_error or 0, do not return length */
+/* TODO change interface: only return wire_error or 0, do not return length */
 
 enum wire_error {
   OUT_OF_BOUNDS = -1,

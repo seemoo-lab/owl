@@ -73,7 +73,7 @@ void awdl_election_run(struct awdl_election_state *state, const struct awdl_peer
 
 	awdl_election_reset_self(state);
 
-	/* FIXME probably not fully correct */
+	/* probably not fully correct */
 	while (awdl_peers_it_next(it, &peer) == PEERS_OK) {
 		int cmp_metric;
 		struct awdl_election_state *peer_state = &peer->election;

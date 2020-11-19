@@ -72,7 +72,7 @@ static int open_nonblocking_device(const char *dev, pcap_t **pcap_handle, const 
 		return -1;
 	}
 
-	/* FIXME direction does not seem to have an effect (we get our own frames every time we poll) */
+	/* TODO direction does not seem to have an effect (we get our own frames every time we poll) */
 	if (pcap_setdirection(handle, PCAP_D_IN)) {
 		log_warn("pcap: unable to monitor only incoming traffic on device %s (%s)", dev, pcap_geterr(handle));
 	}
