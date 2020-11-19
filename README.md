@@ -20,16 +20,6 @@ OWL is not affiliated with or endorsed by Apple Inc. Use this code at your own r
 **No support for virtual machines and WSL.** OWL requires direct access to the Wi-Fi card which means that virtualized environments (except with USB or PCIe passthrough) and Windows Subsystem for Linux (WSL, see [issue #8](https://github.com/seemoo-lab/owl/issues/8)), are *not supported*.
 
 
-## Installation
-
-If you're an Arch Linux user, then you can install `owl` from the
-[`owlink-git` AUR package](https://aur.archlinux.org/packages/owlink-git/), e.g.,
-
-```sh
-yay -S owlink-git
-```
-
-
 ## Build from source
 
 The project is build using CMake. To build the project, simply clone this repository in `<OWLDIR>` and run
