@@ -66,6 +66,8 @@ Simply run
 ```sh
 sudo owl -i <WLAN_IFACE>
 ```
+You can specify a wireless channel using the `-c` parameter. Available channels are 6, 44 and 149. Note that only some of these channels may be available for use in your country based on your regulatory domain. OWL will warn you if it is unable to use the specified channel, in which case you will only be able to monitor the network.
+On Linux, you can check which channels are available for use in your country using `iw list` in `Frequencies` section. A channel is not available if it is listed as `disabled` or `no IR`.
 
 You may increase the log level with `-v` and `-vv` and daemonize the program with `-D`. For other options, have a look at `daemon/owl.c`.
 **Warning:** do not use the `-N` flag in setups without Nexmon such as [this](https://owlink.org/2019/05/16/howto-use-airdrop-on-raspberry-pi-3.html) as it will likely [cause several problems](https://github.com/seemoo-lab/owl/issues/12#issuecomment-673651362).

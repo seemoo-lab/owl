@@ -20,6 +20,7 @@
 #ifndef OWL_NETUTILS_H_
 #define OWL_NETUTILS_H_
 
+#include <stdbool.h>
 #include <netinet/in.h>
 #ifdef __APPLE__
 #include <net/ethernet.h>
@@ -42,6 +43,8 @@ int netutils_init();
 void netutils_cleanup();
 
 int set_monitor_mode(int ifindex);
+
+int is_channel_available(int ifindex, int channel, bool *is_available);
 
 int set_channel(int ifindex, int channel);
 

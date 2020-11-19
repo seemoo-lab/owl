@@ -20,6 +20,7 @@
 #include "netutils.h"
 
 #include <errno.h>
+#include <stdbool.h>
 #include <ieee80211.h>
 #include <log.h>
 #include <string.h>
@@ -251,7 +252,143 @@ out:
 	return err;
 }
 
-int set_channel(int ifindex, int channel /* TODO int ctrl_freq , int bw, int cntr_freq */) {
+#define BIT(x) (1ULL<<(x))
+
+struct channels_ctx {
+	int last_band;
+	bool width_40;
+	bool width_80;
+	bool width_160;
+};
+
+struct channel_args {
+	int freq;
+	bool is_available;
+	struct channels_ctx ctx;
+};
+
+/* Inspired by iw/phy.c */
+static int parse_freq_support(struct nl_msg *msg, void *arg)
+{
+	struct genlmsghdr *gnlh = nlmsg_data(nlmsg_hdr(msg));
+	struct channel_args *cargs = (struct channel_args *)arg;
+	int test_freq = cargs->freq;
+	struct channels_ctx *ctx = &cargs->ctx;
+	struct nlattr *tb_msg[NL80211_ATTR_MAX + 1];
+	struct nlattr *tb_band[NL80211_BAND_ATTR_MAX + 1];
+	struct nlattr *tb_freq[NL80211_FREQUENCY_ATTR_MAX + 1];
+	struct nlattr *nl_band;
+	struct nlattr *nl_freq;
+	int rem_band, rem_freq;
+
+	nla_parse(tb_msg, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
+
+	if (tb_msg[NL80211_ATTR_WIPHY_BANDS]) {
+		nla_for_each_nested(nl_band, tb_msg[NL80211_ATTR_WIPHY_BANDS], rem_band) {
+			if (ctx->last_band != nl_band->nla_type) {
+				ctx->width_40 = false;
+				ctx->width_80 = false;
+				ctx->width_160 = false;
+				ctx->last_band = nl_band->nla_type;
+			}
+
+			nla_parse(tb_band, NL80211_BAND_ATTR_MAX, nla_data(nl_band), nla_len(nl_band), NULL);
+
+			if (tb_band[NL80211_BAND_ATTR_FREQS]) {
+				nla_for_each_nested(nl_freq, tb_band[NL80211_BAND_ATTR_FREQS], rem_freq) {
+					uint32_t freq;
+
+					nla_parse(tb_freq, NL80211_FREQUENCY_ATTR_MAX, nla_data(nl_freq), nla_len(nl_freq), NULL);
+
+					if (!tb_freq[NL80211_FREQUENCY_ATTR_FREQ])
+						continue;
+					freq = nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_FREQ]);
+
+					if ((int) freq != test_freq)
+						continue;
+
+					if (tb_freq[NL80211_FREQUENCY_ATTR_DISABLED] || tb_freq[NL80211_FREQUENCY_ATTR_NO_IR]) {
+						if (tb_freq[NL80211_FREQUENCY_ATTR_DISABLED])
+							log_debug("Channel %d [%d MHz] is disabled", ieee80211_frequency_to_channel(freq), freq);
+						if (tb_freq[NL80211_FREQUENCY_ATTR_NO_IR])
+							log_debug("Channel %d [%d MHz] does not allow to initiate radiation first (no IR)", ieee80211_frequency_to_channel(freq), freq);
+						log_warn("Cannot inject frames on channel %d [%d MHz], try setting a regulatory domain (`iw reg set <CC>`) or using a different channel (6, 49, or 149)", ieee80211_frequency_to_channel(freq), freq);
+						continue;
+					}
+
+					log_debug("Channel %d [%d MHz] is available for frame injection", ieee80211_frequency_to_channel(freq), freq);
+					cargs->is_available = true;
+				}
+			}
+		}
+	}
+
+	return NL_SKIP;
+}
+
+int is_channel_available(int ifindex, const int channel, bool *is_available) {
+	int err;
+	struct nl_msg *m;
+	struct nl_cb *cb;
+	int freq;
+	static struct channel_args args = {
+		.is_available = false,
+		.ctx = {
+			.last_band = -1,
+		},
+	};
+	
+	freq = ieee80211_channel_to_frequency(channel);
+	if (!freq) {
+		log_error("Invalid channel number %d", channel);
+		err = -EINVAL;
+		goto out;
+	}
+	args.freq = freq;
+
+	m = nlmsg_alloc();
+	if (!m) {
+		log_error("Could not allocate netlink message");
+		err = -ENOMEM;
+		goto out;
+	}
+
+	cb = nl_cb_alloc(NL_CB_DEFAULT);
+
+	if (genlmsg_put(m, 0, 0, nl80211_state.nl80211_id, 0, 0, NL80211_CMD_GET_WIPHY, 0) == NULL) {
+		err = -ENOBUFS;
+		goto out;
+	}
+
+	NLA_PUT_U32(m, NL80211_ATTR_IFINDEX, ifindex);
+
+	nla_put_flag(m, NL80211_ATTR_SPLIT_WIPHY_DUMP);
+	nlmsg_hdr(m)->nlmsg_flags |= NLM_F_DUMP;
+
+	err = nl_send_auto(nl80211_state.socket, m);
+	if (err < 0) {
+		log_error("error while sending via netlink");
+		goto out;
+	}
+
+	nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, parse_freq_support, &args);
+
+	err = nl_recvmsgs(nl80211_state.socket, cb);
+	goto out;
+
+nla_put_failure:
+	log_error("building message failed");
+	err = -ENOBUFS;
+out:
+	if (cb)
+		nl_cb_put(cb);
+	if (m)
+		nlmsg_free(m);
+	*is_available = args.is_available;
+	return err;
+}
+
+int set_channel(int ifindex, int channel) {
 	int err;
 	struct nl_msg *m;
 	int freq;
@@ -375,6 +512,14 @@ void netutils_cleanup() {
 int set_monitor_mode(int ifindex) {
 	corewlan_disassociate(ifindex);
 	/* TODO implement here instead of using libpcap */
+	return 0;
+}
+
+int is_channel_available(int ifindex, int channel, bool *is_available) {
+	/* we assume that channel is always available on macOS */
+	(void) ifindex;
+	(void) channel;
+	*is_available = true;
 	return 0;
 }
 
