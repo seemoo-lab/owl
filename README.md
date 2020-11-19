@@ -1,6 +1,8 @@
 # Open Wireless Link
 
-Open Wireless Link (OWL) is an open implementation of the Apple Wireless Direct Link (AWDL) ad hoc protocol for Linux and macOS written in C and part of the [Open Wireless Link project](https://owlink.org).
+[![Language grade](https://img.shields.io/lgtm/grade/cpp/g/seemoo-lab/owl.svg?logo=lgtm&label=code%20quality)](https://lgtm.com/projects/g/seemoo-lab/owl/context:cpp)
+
+*Open Wireless Link (OWL)* is an open implementation of the Apple Wireless Direct Link (AWDL) ad hoc protocol for Linux and macOS written in C and part of the [Open Wireless Link project](https://owlink.org).
 
 OWL runs in user space and makes use of Linux’s Netlink API for Wi-Fi specific operations such as channel switching and to integrate itself in the Linux networking stack by providing a virtual network interface such that existing IPv6-capable programs can use AWDL without modification.
 
