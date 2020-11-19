@@ -7,7 +7,7 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif ()
 
 add_library(radiotap radiotap/radiotap.c)
-target_compile_definitions(radiotap PRIVATE -D_BSD_SOURCE -DRADIOTAP_SUPPORT_OVERRIDES)
+target_compile_definitions(radiotap PRIVATE -D_BSD_SOURCE -D_DEFAULT_SOURCE -DRADIOTAP_SUPPORT_OVERRIDES)
 
 add_subdirectory(src)
 
