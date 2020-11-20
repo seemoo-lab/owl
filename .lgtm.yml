@@ -3,4 +3,14 @@ path_classifiers:
     - googletest
     - radiotap
   test:
-    - googletest
+    - tests
+extraction:
+  cpp:
+    prepare:
+      # Ubuntu packages to be installed
+      packages:
+        - libpcap-dev
+        - libev-dev
+        - libnl-3-dev
+        - libnl-genl-3-dev
+        - libnl-route-3-dev
