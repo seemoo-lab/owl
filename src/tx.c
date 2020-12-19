@@ -52,7 +52,7 @@ int awdl_init_data(uint8_t *buf, struct awdl_state *state) {
 int awdl_init_action(uint8_t *buf, enum awdl_action_type type) {
 	struct awdl_action *af = (struct awdl_action *) buf;
 
-	uint32_t steady_time = (uint32_t) clock_time_us(); /* TODO awdl_init_* methods should not call clock_time_us() themselves but rather be given as parameter to avoid inconsitent calculation of stuff, e.g., fields in sync parameters should be calculated based on the timestamp indicated in af->target_tx */
+	uint32_t steady_time = (uint32_t) clock_time_us(); /* TODO awdl_init_* methods should not call clock_time_us() themselves but rather be given as parameter to avoid inconsistent calculation of stuff, e.g., fields in sync parameters should be calculated based on the timestamp indicated in af->target_tx */
 	af->category = IEEE80211_VENDOR_SPECIFIC; /* vendor specific */
 	af->oui = AWDL_OUI;
 	af->type = AWDL_TYPE;
