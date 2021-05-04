@@ -22,19 +22,6 @@ OWL is not affiliated with or endorsed by Apple Inc. Use this code at your own r
 **No support for virtual machines and WSL.** OWL requires direct access to the Wi-Fi card which means that virtualized environments (except with USB or PCIe passthrough) and Windows Subsystem for Linux (WSL, see [issue #8](https://github.com/seemoo-lab/owl/issues/8)), are *not supported*.
 
 
-## Build from source
-
-The project is build using CMake. To build the project, simply clone this repository in `<OWLDIR>` and run
-```sh
-cd <OWLDIR>
-git submodule update --init
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-```
-
 OWL requires `libpcap` for frame injection and reception, `libev` for event handling, and `libnl` (Linux only) for interactions with the system's networking stack which have to be installed on the target system.
 
 On Debian Linux,
@@ -50,6 +37,20 @@ On macOS, you need to add support for tun/tap devices, e.g., via [tuntaposx](htt
 brew install libpcap libev
 brew cask install tuntap
 ```
+
+## Build from source
+
+The project is build using CMake. To build the project, simply clone this repository in `<OWLDIR>` and run
+```sh
+cd <OWLDIR>
+git submodule update --init
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
+
 
 ## Use
 
