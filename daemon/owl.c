@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 	int filter_rssi = 1;
 	int no_monitor_mode = 0;
 
-	char wlan[PATH_MAX];
+	char wlan[PATH_MAX] = "";
 	char host[IFNAMSIZ] = DEFAULT_AWDL_DEVICE;
 
 	struct ev_loop *loop;
@@ -180,6 +180,11 @@ int main(int argc, char *argv[]) {
 		default:
 			log_error("Unsupported channel %d (use 6, 44, or 149)", chan_num);
 			return EXIT_FAILURE;
+	}
+
+	if (!*wlan) {
+		log_error("No interface specified");
+		return EXIT_FAILURE;
 	}
 
 	state.io.wlan_no_monitor_mode = no_monitor_mode;
