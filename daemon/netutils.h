@@ -24,6 +24,9 @@
 #include <netinet/in.h>
 #ifdef __APPLE__
 #include <net/ethernet.h>
+#elif __BIONIC__
+#include <net/ethernet.h>
+#include <netinet/ether.h>
 #else
 #include <netinet/ether.h>
 #endif
