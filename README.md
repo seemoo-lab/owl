@@ -35,7 +35,7 @@ sudo dnf install libpcap-devel libev-devel libnl3-devel
 On macOS, you need to add support for tun/tap devices, e.g., via [tuntaposx](http://tuntaposx.sourceforge.net). You can install everything via [Homebrew](https://brew.sh):
 ```sh
 brew install libpcap libev
-brew cask install tuntap
+brew install --cask tuntap
 ```
 
 ## Build from source
