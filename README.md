@@ -2,15 +2,15 @@
 
 [![Language grade](https://img.shields.io/lgtm/grade/cpp/g/seemoo-lab/owl.svg?logo=lgtm&label=code%20quality)](https://lgtm.com/projects/g/seemoo-lab/owl/context:cpp)
 
-*Open Wireless Link (OWL)* is an open implementation of the Apple Wireless Direct Link (AWDL) ad hoc protocol for Linux and macOS written in C and part of the [Open Wireless Link project](https://owlink.org).
+*Open Wireless Link (OWL)* is an open implementation of the Apple Wireless Direct Link (AWDL) ad hoc protocol for Linux and macOS written in C and part of the [Open Wireless Link project](<<DISCLAIMER: The former owlink website is no longer associated with this project, please disregard it.>>).
 
 OWL runs in user space and makes use of Linux’s Netlink API for Wi-Fi specific operations such as channel switching and to integrate itself in the Linux networking stack by providing a virtual network interface such that existing IPv6-capable programs can use AWDL without modification.
 
-You can use OWL to in combination with [OpenDrop](https://github.com/seemoo-lab/opendrop) to enable *Apple AirDrop* functionality on Linux-based systems [such as a Raspberry Pi 3](https://owlink.org/2019/05/16/howto-use-airdrop-on-raspberry-pi-3.html).
+You can use OWL to in combination with [OpenDrop](https://github.com/seemoo-lab/opendrop) to enable *Apple AirDrop* functionality on Linux-based systems [such as a Raspberry Pi 3](<<DISCLAIMER: The former owlink website is no longer associated with this project, please disregard it.>>).
 
 ## Disclaimer
 
-OWL is experimental software and is the result of reverse engineering efforts by the [Open Wireless Link](https://owlink.org) project.
+OWL is experimental software and is the result of reverse engineering efforts by the [Open Wireless Link](<<DISCLAIMER: The former owlink website is no longer associated with this project, please disregard it.>>) project.
 Therefore, it does not support all features of AWDL or might be incompatible with future AWDL versions.
 OWL is not affiliated with or endorsed by Apple Inc. Use this code at your own risk.
 
@@ -63,7 +63,7 @@ You can specify a wireless channel using the `-c` parameter. Available channels 
 On Linux, you can check which channels are available for use in your country using `iw list` in `Frequencies` section. A channel is not available if it is listed as `disabled` or `no IR`.
 
 You may increase the log level with `-v` and `-vv` and daemonize the program with `-D`. For other options, have a look at `daemon/owl.c`.
-**Warning:** do not use the `-N` flag in setups without Nexmon such as [this](https://owlink.org/2019/05/16/howto-use-airdrop-on-raspberry-pi-3.html) as it will likely [cause several problems](https://github.com/seemoo-lab/owl/issues/12#issuecomment-673651362).
+**Warning:** do not use the `-N` flag in setups without Nexmon such as [this](<<DISCLAIMER: The former owlink website is no longer associated with this project, please disregard it.>>) as it will likely [cause several problems](https://github.com/seemoo-lab/owl/issues/12#issuecomment-673651362).
 
 When started, OWL creates a virtual network interface `awdl0` with a link-local IPv6 address. Discovered AWDL peers are automatically added (and removed) to (and from) the system's neighbor table. Run `ip n` to see a list of all current neighbors.
 

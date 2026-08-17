@@ -1,6 +1,6 @@
 /*
  * OWL: an open Apple Wireless Direct Link (AWDL) implementation
- * Copyright (C) 2018  The Open Wireless Link Project (https://owlink.org)
+ * Copyright (C) 2018  The Open Wireless Link Project
  * Copyright (C) 2018  Milan Stute
  *
  * This program is free software: you can redistribute it and/or modify
@@ -161,7 +161,6 @@ int main(int argc, char *argv[]) {
 	       "\n"
 	       "            Open Wireless Link\n"
 	       "\n"
-	       "            https://owlink.org\n"
 	       "\n");
 
 	if (daemon)
