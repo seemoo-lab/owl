@@ -10,7 +10,7 @@ You can use OWL to in combination with [OpenDrop](https://github.com/seemoo-lab/
 
 ## Disclaimer
 
-OWL is experimental software and is the result of reverse engineering efforts by the [Open Wireless Link](<<DISCLAIMER: The former owlink website is no longer associated with this project, please disregard it.>>) project.
+OWL is experimental software and is the result of reverse engineering efforts by the [Open Wireless Link](<<DISCLAIMER: The former owlink website is no longer associated with this project, please disregard it.>>) project and no longer maintained.
 Therefore, it does not support all features of AWDL or might be incompatible with future AWDL versions.
 OWL is not affiliated with or endorsed by Apple Inc. Use this code at your own risk.
 
